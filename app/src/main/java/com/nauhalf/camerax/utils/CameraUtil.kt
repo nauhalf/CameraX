@@ -42,13 +42,14 @@ class CameraUtil(
 
     private var controller: CameraController? = null
 
-    fun startCamera() {
+    fun startCamera(selector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA) {
         controller = LifecycleCameraController(activity.baseContext)
 
         (controller as LifecycleCameraController).apply {
             unbind()
             bindToLifecycle(activity)
         }
+        controller?.cameraSelector = selector
         preview.controller = controller
     }
 
