@@ -1,4 +1,4 @@
-package com.nauhalf.camerax
+package com.nauhalf.camerax.utils
 
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
