@@ -11,14 +11,26 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import id.dipay.camerax.CameraUtil
+import id.dipay.camerax.Selector
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
     private val vm by viewModels<MainViewModel>()
 
     private val cameraUtil: CameraUtil by lazy {
-        CameraUtil(this, viewFinder, CameraUtil.getOutputDirectory(this))
+        CameraUtil(this, this, viewFinder, getOutputDirectory())
+    }
+
+    private fun getOutputDirectory(): File {
+        val mediaDir = this.externalMediaDirs.firstOrNull()?.let {
+            File(it, resources.getString(R.string.app_name)).apply {
+                mkdirs()
+            }
+        }
+
+        return if (mediaDir != null && mediaDir.exists()) mediaDir else filesDir
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,12 +67,12 @@ class MainActivity : AppCompatActivity() {
     private fun observeLiveData() {
         vm.cameraSelector.observe(this) {
             when (it) {
-                CameraUtil.CAMERA_SELECTOR.FRONT -> {
+                Selector.FRONT -> {
                     identityFrame.visibility = View.GONE
                     personFrame.visibility = View.VISIBLE
                 }
 
-                CameraUtil.CAMERA_SELECTOR.BACK -> {
+                Selector.BACK -> {
                     identityFrame.visibility = View.VISIBLE
                     personFrame.visibility = View.GONE
                 }
