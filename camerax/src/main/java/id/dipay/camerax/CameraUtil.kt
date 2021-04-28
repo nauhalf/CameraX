@@ -1,4 +1,4 @@
-package com.nauhalf.camerax.utils
+package id.dipay.camerax
 
 import android.net.Uri
 import android.util.Log
@@ -10,7 +10,6 @@ import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
-import com.nauhalf.camerax.R
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -31,7 +30,7 @@ class CameraUtil(
 
         fun getOutputDirectory(activity: AppCompatActivity): File {
             val mediaDir = activity.externalMediaDirs.firstOrNull()?.let {
-                File(it, activity.resources.getString(R.string.app_name)).apply {
+                File(it, activity.applicationInfo.loadLabel(activity.packageManager).toString()).apply {
                     mkdirs()
                 }
             }
