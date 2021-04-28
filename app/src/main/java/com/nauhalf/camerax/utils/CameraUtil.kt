@@ -42,8 +42,11 @@ class CameraUtil(
 
     private var controller: CameraController? = null
 
-    fun startCamera(selector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA) {
+    init {
         controller = LifecycleCameraController(activity.baseContext)
+    }
+
+    fun startCamera(selector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA) {
 
         (controller as LifecycleCameraController).apply {
             unbind()
@@ -85,17 +88,25 @@ class CameraUtil(
         }
     }
 
-    fun flipCamera() {
+    fun flipCamera(currentCameraSelector: (CAMERA_SELECTOR) -> Unit) {
         controller?.apply {
             when (cameraSelector) {
                 CameraSelector.DEFAULT_BACK_CAMERA -> {
                     cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+                    currentCameraSelector(CAMERA_SELECTOR.FRONT)
                 }
                 CameraSelector.DEFAULT_FRONT_CAMERA -> {
                     cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                    currentCameraSelector(CAMERA_SELECTOR.BACK)
+
                 }
             }
         }
+    }
+
+    enum class CAMERA_SELECTOR {
+        FRONT,
+        BACK
     }
 
 }

@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.core.app.ActivityCompat
@@ -13,6 +15,8 @@ import com.nauhalf.camerax.utils.CameraUtil
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+
+    private val vm by viewModels<MainViewModel>()
 
     private val cameraUtil: CameraUtil by lazy {
         CameraUtil(this, viewFinder, CameraUtil.getOutputDirectory(this))
@@ -23,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         if (allPermissionsGranted()) {
-            cameraUtil.startCamera(CameraSelector.DEFAULT_FRONT_CAMERA)
+            cameraUtil.startCamera()
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
@@ -41,10 +45,36 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnMirror.setOnClickListener {
-            cameraUtil.flipCamera()
+            cameraUtil.flipCamera { selector ->
+                vm.setCameraSelector(selector)
+            }
         }
 
+        observeLiveData()
     }
+
+    private fun observeLiveData() {
+        vm.cameraSelector.observe(this) {
+            when (it) {
+                CameraUtil.CAMERA_SELECTOR.FRONT -> {
+                    identityFrame.visibility = View.GONE
+                    personFrame.visibility = View.VISIBLE
+                }
+
+                CameraUtil.CAMERA_SELECTOR.BACK -> {
+                    identityFrame.visibility = View.VISIBLE
+                    personFrame.visibility = View.GONE
+                }
+
+                else -> {
+                    identityFrame.visibility = View.VISIBLE
+                    personFrame.visibility = View.GONE
+                }
+            }
+
+        }
+    }
+
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(
