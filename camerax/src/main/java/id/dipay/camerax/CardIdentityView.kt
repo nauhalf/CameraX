@@ -1,4 +1,4 @@
-package com.nauhalf.camerax.utils
+package id.dipay.camerax
 
 import android.content.Context
 import android.graphics.*

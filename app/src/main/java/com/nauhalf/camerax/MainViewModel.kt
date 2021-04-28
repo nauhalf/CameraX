@@ -3,7 +3,7 @@ package com.nauhalf.camerax
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.nauhalf.camerax.utils.CameraUtil
+import id.dipay.camerax.CameraUtil
 
 class MainViewModel : ViewModel() {
     private val _cameraSelector = MutableLiveData(CameraUtil.CAMERA_SELECTOR.BACK)

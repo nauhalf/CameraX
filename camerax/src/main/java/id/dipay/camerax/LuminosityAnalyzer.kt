@@ -1,4 +1,4 @@
-package com.nauhalf.camerax.utils
+package id.dipay.camerax
 
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy

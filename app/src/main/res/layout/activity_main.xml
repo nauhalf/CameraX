@@ -58,12 +58,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/control">
 
-        <com.nauhalf.camerax.utils.HeadPersonView
+        <id.dipay.camerax.HeadPersonView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/personFrame" />
 
-        <com.nauhalf.camerax.utils.CardIdentityView
+        <id.dipay.camerax.CardIdentityView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/identityFrame"/>
@@ -71,7 +71,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <!--    <com.nauhalf.camerax.utils.CameraIdentityFrame-->
+    <!--    <id.dipay.camerax.utils.CameraIdentityFrame-->
     <!--        android:id="@+id/frameIdentity"-->
     <!--        android:layout_width="match_parent"-->
     <!--        android:layout_height="match_parent"-->
