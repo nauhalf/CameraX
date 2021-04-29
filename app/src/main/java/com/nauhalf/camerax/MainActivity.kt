@@ -79,7 +79,7 @@ open class MainActivity : AppCompatActivity() {
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                 Log.d(CameraUtil.TAG, msg)
             }, {
-                Toast.makeText(this, "Timer - $it seconds", Toast.LENGTH_SHORT).show()
+                vm.setTimer(it)
             })
         }
 
