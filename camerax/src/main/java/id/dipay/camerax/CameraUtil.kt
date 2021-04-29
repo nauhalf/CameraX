@@ -35,7 +35,6 @@ import kotlin.math.min
  * */
 
 class CameraUtil(
-        private val context: Context,
         private val activity: Activity,
         private val lifecycleOwner: LifecycleOwner,
         private val coroutineScope: CoroutineScope,
@@ -44,7 +43,7 @@ class CameraUtil(
 ) {
 
     // An instance for display manager to get display change callbacks
-    private val displayManager by lazy { context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
+    private val displayManager by lazy { activity.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
     private var preview: Preview? = null
     private var mPreviewDisplay: Display? = null
     private var cameraProvider: ProcessCameraProvider? = null
@@ -81,7 +80,7 @@ class CameraUtil(
     init {
         // Listen to motion sensor reading and set target rotation for ImageCapture and
         // VideoCapture.
-        mSensorRotationListener = object : SensorRotationListener(context) {
+        mSensorRotationListener = object : SensorRotationListener(activity) {
             override fun onRotationChanged(rotation: Int) {
                 imageCapture?.targetRotation = rotation
             }
@@ -135,7 +134,7 @@ class CameraUtil(
 
     fun startCamera() {
         // This is the CameraX PreviewView where the camera will be rendered
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(activity)
         cameraProviderFuture.addListener({
             cameraProvider = cameraProviderFuture.get()
 
@@ -209,7 +208,7 @@ class CameraUtil(
                 Log.e(TAG, "Failed to bind use cases", e)
             }
 
-        }, ContextCompat.getMainExecutor(context))
+        }, ContextCompat.getMainExecutor(activity))
     }
 
     @Suppress("NON_EXHAUSTIVE_WHEN")

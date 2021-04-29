@@ -26,7 +26,7 @@ open class MainActivity : AppCompatActivity() {
     private val vm by viewModels<MainViewModel>()
 
     private val cameraUtil: CameraUtil by lazy {
-        CameraUtil(this, this, this, this.lifecycleScope, viewFinder, outputDirectory())
+        CameraUtil(this, this, this.lifecycleScope, viewFinder, outputDirectory())
     }
 
     private fun outputDirectory(): String {
