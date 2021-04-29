@@ -35,11 +35,7 @@ import kotlin.math.min
  * */
 
 class CameraUtil(
-        private val activity: Activity,
-        private val lifecycleOwner: LifecycleOwner,
-        private val coroutineScope: CoroutineScope,
-        private val viewFinder: PreviewView,
-        private val outputDirectory: String
+    private val activity: Activity,
 ) {
 
     // An instance for display manager to get display change callbacks
@@ -50,8 +46,6 @@ class CameraUtil(
     private var imageCapture: ImageCapture? = null
     private var imageAnalyzer: ImageAnalysis? = null
 
-    private var mWidth = 0
-    private var mHeight = 0
     private var mFlashMode = FLASH_MODE_OFF
     private var mQuality = CAPTURE_MODE_MAXIMIZE_QUALITY
     private var mLensFacing = CameraSelector.DEFAULT_BACK_CAMERA
@@ -60,7 +54,10 @@ class CameraUtil(
     private var mSelectedTimer = CameraTimer.OFF
 
     var mSensorRotationListener: SensorRotationListener? = null
-
+    private var lifecycleOwner: LifecycleOwner? = null
+    private var coroutineScope: CoroutineScope? = null
+    private var viewFinder: PreviewView? = null
+    private var outputDirectory: String? = ""
 
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) = Unit
@@ -86,12 +83,38 @@ class CameraUtil(
             }
         }
 
-        mPreviewDisplay = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            activity.display
-        } else {
-            activity.windowManager.defaultDisplay
-        }
+        mPreviewDisplay =
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                activity.display
+            } else {
+                activity.windowManager.defaultDisplay
+            }
 
+    }
+
+    fun setLifecycleOwner(lifecycleOwner: LifecycleOwner): CameraUtil {
+        this.lifecycleOwner = lifecycleOwner
+        return this
+    }
+
+    fun setCoroutineScope(coroutineScope: CoroutineScope): CameraUtil {
+        this.coroutineScope = coroutineScope
+        return this
+    }
+
+    fun setPreviewView(previewView: PreviewView): CameraUtil {
+        this.viewFinder = previewView
+        return this
+    }
+
+    fun setOutputDirectory(outputDirectory: String): CameraUtil {
+        this.outputDirectory = outputDirectory
+        return this
+    }
+
+    fun setTimer(timer: CameraTimer): CameraUtil{
+        this.mSelectedTimer = timer
+        return this
     }
 
     fun registerDisplayManager() {
@@ -139,27 +162,27 @@ class CameraUtil(
             cameraProvider = cameraProviderFuture.get()
 
             // The display information
-            val metrics = DisplayMetrics().also { viewFinder.display.getRealMetrics(it) }
+            val metrics = DisplayMetrics().also { viewFinder?.display?.getRealMetrics(it) }
             // The ratio for the output image and preview
             val aspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
             // The display rotation
-            val rotation = viewFinder.display.rotation
+            val rotation = viewFinder?.display?.rotation as Int
 
             val localCameraProvider = cameraProvider
-                    ?: throw IllegalStateException("Camera initialization failed.")
+                ?: throw IllegalStateException("Camera initialization failed.")
 
             // The Configuration of camera preview
             preview = Preview.Builder()
-                    .setTargetAspectRatio(aspectRatio) // set the camera aspect ratio
-                    .setTargetRotation(rotation) // set the camera rotation
-                    .build()
+                .setTargetAspectRatio(aspectRatio) // set the camera aspect ratio
+                .setTargetRotation(rotation) // set the camera rotation
+                .build()
 
             // The Configuration of image capture
             imageCapture = Builder()
-                    .setCaptureMode(mQuality) // setting to have pictures with highest quality possible (may be slow)
-                    .setFlashMode(mFlashMode) // set capture flash
-                    .setTargetAspectRatio(aspectRatio) // set the capture aspect ratio
-                    .setTargetRotation(rotation) // set the capture rotation
+                .setCaptureMode(mQuality) // setting to have pictures with highest quality possible (may be slow)
+                .setFlashMode(mFlashMode) // set capture flash
+                .setTargetAspectRatio(aspectRatio) // set the capture aspect ratio
+                .setTargetRotation(rotation) // set the capture rotation
 //                .also {
 //                    // Create a Vendor Extension for HDR
 ////                    val hdrImageCapture = HdrImageCaptureExtender.create(it)
@@ -173,37 +196,37 @@ class CameraUtil(
 //                        hdrImageCapture.enableExtension(mLensFacing)
 //                    }
 //                }
-                    .build()
+                .build()
 
             // The Configuration of image analyzing
             imageAnalyzer = ImageAnalysis.Builder()
-                    .setTargetAspectRatio(aspectRatio) // set the analyzer aspect ratio
-                    .setTargetRotation(rotation) // set the analyzer rotation
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // in our analysis, we care about the latest image
-                    .build()
-                    .apply {
-                        // Use a worker thread for image analysis to prevent glitches
-                        val analyzerThread = HandlerThread("LuminosityAnalysis").apply { start() }
-                        setAnalyzer(
-                                ThreadExecutor(Handler(analyzerThread.looper)),
-                                LuminosityAnalyzer()
-                        )
-                    }
+                .setTargetAspectRatio(aspectRatio) // set the analyzer aspect ratio
+                .setTargetRotation(rotation) // set the analyzer rotation
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // in our analysis, we care about the latest image
+                .build()
+                .apply {
+                    // Use a worker thread for image analysis to prevent glitches
+                    val analyzerThread = HandlerThread("LuminosityAnalysis").apply { start() }
+                    setAnalyzer(
+                        ThreadExecutor(Handler(analyzerThread.looper)),
+                        LuminosityAnalyzer()
+                    )
+                }
 
             localCameraProvider.unbindAll() // unbind the use-cases before rebinding them
 
             try {
                 // Bind all use cases to the camera with lifecycle
                 localCameraProvider.bindToLifecycle(
-                        lifecycleOwner, // current lifecycle owner
-                        mLensFacing, // either front or back facing
-                        preview, // camera preview use case
-                        imageCapture, // image capture use case
-                        imageAnalyzer, // image analyzer use case
+                    lifecycleOwner!!, // current lifecycle owner
+                    mLensFacing, // either front or back facing
+                    preview, // camera preview use case
+                    imageCapture, // image capture use case
+                    imageAnalyzer, // image analyzer use case
                 )
 
                 // Attach the viewfinder's surface provider to preview use case
-                preview?.setSurfaceProvider(viewFinder.surfaceProvider)
+                preview?.setSurfaceProvider(viewFinder?.surfaceProvider)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to bind use cases", e)
             }
@@ -213,21 +236,21 @@ class CameraUtil(
 
     @Suppress("NON_EXHAUSTIVE_WHEN")
     fun takePicture(result: (Uri) -> Unit, timer: ((Int) -> Unit)? = null) =
-            coroutineScope.launch(Dispatchers.Main) {
-                // Show a timer based on user selection
-                when (mSelectedTimer) {
-                    CameraTimer.S3 -> for (i in 3 downTo 1) {
-                        timer?.invoke(i)
-                        delay(1000)
-                    }
-                    CameraTimer.S10 -> for (i in 10 downTo 1) {
-                        timer?.invoke(i)
-                        delay(1000)
-                    }
+        coroutineScope?.launch(Dispatchers.Main) {
+            // Show a timer based on user selection
+            when (mSelectedTimer) {
+                CameraTimer.S3 -> for (i in 3 downTo 1) {
+                    timer?.invoke(i)
+                    delay(1000)
                 }
-                timer?.invoke(0)
-                captureImage(result)
+                CameraTimer.S10 -> for (i in 10 downTo 1) {
+                    timer?.invoke(i)
+                    delay(1000)
+                }
             }
+            timer?.invoke(0)
+            captureImage(result)
+        }
 
     fun flash(@FlashMode flash: Int) {
         setFlashMode(flash)
@@ -247,7 +270,7 @@ class CameraUtil(
 
     private fun captureImage(result: (Uri) -> Unit) {
         val localImageCapture =
-                imageCapture ?: throw IllegalStateException("Camera initialization failed.")
+            imageCapture ?: throw IllegalStateException("Camera initialization failed.")
 
         // Setup image capture metadata
         val metadata = Metadata().apply {
@@ -264,22 +287,22 @@ class CameraUtil(
 
         val executor = Executors.newSingleThreadExecutor()
         localImageCapture.takePicture(
-                outputOptions, // the options needed for the final image
-                executor, // the executor, on which the task will run
-                object : ImageCapture.OnImageSavedCallback {
-                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                        outputFileResults.savedUri
-                                ?.let { uri ->
-                                    result(uri)
-                                    Log.d(TAG, "Photo saved in $uri")
-                                }
-                    }
-
-                    override fun onError(exception: ImageCaptureException) {
-                        val msg = "Photo capture failed: ${exception.message}"
-                        Log.e(TAG, msg)
-                    }
+            outputOptions, // the options needed for the final image
+            executor, // the executor, on which the task will run
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                    outputFileResults.savedUri
+                        ?.let { uri ->
+                            result(uri)
+                            Log.d(TAG, "Photo saved in $uri")
+                        }
                 }
+
+                override fun onError(exception: ImageCaptureException) {
+                    val msg = "Photo capture failed: ${exception.message}"
+                    Log.e(TAG, msg)
+                }
+            }
         )
     }
 

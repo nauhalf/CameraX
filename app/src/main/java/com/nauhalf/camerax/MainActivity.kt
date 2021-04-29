@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import id.dipay.camerax.CameraUtil
 import id.dipay.camerax.Selector
+import id.dipay.utils.CameraTimer
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.lang.IllegalStateException
@@ -26,7 +27,12 @@ open class MainActivity : AppCompatActivity() {
     private val vm by viewModels<MainViewModel>()
 
     private val cameraUtil: CameraUtil by lazy {
-        CameraUtil(this, this, this.lifecycleScope, viewFinder, outputDirectory())
+        CameraUtil(this)
+            .setLifecycleOwner(this)
+            .setCoroutineScope(this.lifecycleScope)
+            .setPreviewView(viewFinder)
+            .setOutputDirectory(outputDirectory())
+            .setTimer(CameraTimer.S10)
     }
 
     private fun outputDirectory(): String {
@@ -37,11 +43,6 @@ open class MainActivity : AppCompatActivity() {
         }
 
         return if (mediaDir != null && mediaDir.exists()) mediaDir.absolutePath else filesDir.absolutePath
-    }
-
-    // The Folder location where all the files will be stored
-    private val outputDirectory: String by lazy {
-        "$cacheDir"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,6 +78,8 @@ open class MainActivity : AppCompatActivity() {
                 val msg = "Photo capture succeeded: $it"
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                 Log.d(CameraUtil.TAG, msg)
+            }, {
+                Toast.makeText(this, "Timer - $it seconds", Toast.LENGTH_SHORT).show()
             })
         }
 
