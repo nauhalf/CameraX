@@ -2,35 +2,46 @@ package com.nauhalf.camerax
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import id.dipay.camerax.CameraUtil
 import id.dipay.camerax.Selector
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
+import java.lang.IllegalStateException
 
-class MainActivity : AppCompatActivity() {
+open class MainActivity : AppCompatActivity() {
 
     private val vm by viewModels<MainViewModel>()
 
     private val cameraUtil: CameraUtil by lazy {
-        CameraUtil(this, this, viewFinder, getOutputDirectory())
+        CameraUtil(this, this, this.lifecycleScope, viewFinder, outputDirectory)
     }
 
-    private fun getOutputDirectory(): File {
-        val mediaDir = this.externalMediaDirs.firstOrNull()?.let {
-            File(it, resources.getString(R.string.app_name)).apply {
-                mkdirs()
-            }
-        }
+//    private fun getOutputDirectory(): File {
+//        val mediaDir = this.externalMediaDirs.firstOrNull()?.let {
+//            File(it, resources.getString(R.string.app_name)).apply {
+//                mkdirs()
+//            }
+//        }
+//
+//        return if (mediaDir != null && mediaDir.exists()) mediaDir else filesDir
+//    }
 
-        return if (mediaDir != null && mediaDir.exists()) mediaDir else filesDir
+    // The Folder location where all the files will be stored
+    private val outputDirectory: String by lazy {
+        "$cacheDir"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,30 +49,54 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         if (allPermissionsGranted()) {
-            cameraUtil.startCamera()
+            try {
+                cameraUtil.startCamera()
+            } catch (exception: IllegalStateException) {
+                Toast.makeText(this, exception.message, Toast.LENGTH_SHORT).show()
+            } catch (exception: Exception) {
+                Toast.makeText(this, exception.message, Toast.LENGTH_SHORT).show()
+            }
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
+        cameraUtil.registerDisplayManager()
+        viewFinder.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View?) {
+                cameraUtil.registerDisplayManager()
+            }
+
+            override fun onViewDetachedFromWindow(v: View?) {
+                cameraUtil.unregisterDisplayManager()
+            }
+
+        })
+
         camera_capture_button.setOnClickListener {
-            cameraUtil.takePhoto {
+            cameraUtil.takePicture({
                 val msg = "Photo capture succeeded: $it"
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                 Log.d(CameraUtil.TAG, msg)
-            }
+            })
         }
 
         btnTorch.setOnClickListener {
-            cameraUtil.toggleTorch()
+            cameraUtil.flash(if (cameraUtil.getFlashMode() != ImageCapture.FLASH_MODE_OFF) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF)
         }
 
         btnMirror.setOnClickListener {
-            cameraUtil.flipCamera { selector ->
+            cameraUtil.flip { selector ->
                 vm.setCameraSelector(selector)
             }
         }
 
         observeLiveData()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraUtil.unbind()
+        cameraUtil.unregisterDisplayManager()
     }
 
     private fun observeLiveData() {
