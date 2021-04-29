@@ -32,7 +32,7 @@ open class MainActivity : AppCompatActivity() {
             .setCoroutineScope(this.lifecycleScope)
             .setPreviewView(viewFinder)
             .setOutputDirectory(outputDirectory())
-            .setTimer(CameraTimer.S10)
+            .setTimer(CameraTimer.S3)
     }
 
     private fun outputDirectory(): String {
@@ -84,13 +84,15 @@ open class MainActivity : AppCompatActivity() {
         }
 
         btnTorch.setOnClickListener {
-            cameraUtil.flash(if (cameraUtil.getFlashMode() == ImageCapture.FLASH_MODE_OFF) {
-                Toast.makeText(this, "FLASH_MODE_ON", Toast.LENGTH_SHORT).show()
-                ImageCapture.FLASH_MODE_ON
-            } else {
-                Toast.makeText(this, "FLASH_MODE_OFF", Toast.LENGTH_SHORT).show()
-                ImageCapture.FLASH_MODE_OFF
-            })
+            cameraUtil.flash(
+                if (cameraUtil.getFlashMode() == ImageCapture.FLASH_MODE_OFF) {
+                    Toast.makeText(this, "FLASH_MODE_ON", Toast.LENGTH_SHORT).show()
+                    ImageCapture.FLASH_MODE_ON
+                } else {
+                    Toast.makeText(this, "FLASH_MODE_OFF", Toast.LENGTH_SHORT).show()
+                    ImageCapture.FLASH_MODE_OFF
+                }
+            )
         }
 
         btnMirror.setOnClickListener {
@@ -127,6 +129,13 @@ open class MainActivity : AppCompatActivity() {
                 }
             }
 
+        }
+
+        vm.timer.observe(this) {
+            tvTimer.visibility = if (it > 0) View.VISIBLE else View.GONE
+            if (it > 0) {
+                tvTimer.text = "Timer : $it"
+            }
         }
     }
 
