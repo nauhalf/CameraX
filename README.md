@@ -1,5 +1,7 @@
 # Custom CameraX
-
+[![](https://jitpack.io/v/nauhalf/CameraX.svg)](https://jitpack.io/#nauhalf/CameraX)
+![API](https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat)
+  
   Custom CameraX with Preview Frame Identity Card and Head with Identity Card
 
 ## How To Use
