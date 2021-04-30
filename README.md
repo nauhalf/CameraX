@@ -1,9 +1,10 @@
-# Custom CameraX
+# CameraX Util
 [![](https://jitpack.io/v/nauhalf/CameraX.svg)](https://jitpack.io/#nauhalf/CameraX)
 ![API](https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat)
   
   Custom CameraX with Preview Frame Identity Card and Head with Identity Card
 
+Thanks to https://github.com/robertlevonyan/CameraXDemo for references
 ## How To Use
 
 ### Step 1. Add the JitPack repository to your build.gradle project
