@@ -1,6 +1,6 @@
 # Custom CameraX
 
-  Custom CameraX with Preview Frame KTP and Head&KTP
+  Custom CameraX with Preview Frame Identity Card and Head with Identity Card
 
 ## How To Use
 
@@ -95,4 +95,17 @@ override fun onDestroy() {
     cameraUtil.unbind()
     cameraUtil.unregisterDisplayManager()
 }
+```
+
+### Custom Frames Identity Card & Head with Identity Card
+```
+<id.dipay.camerax.HeadPersonView
+    android:id="@+id/personFrame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+
+<id.dipay.camerax.CardIdentityView
+    android:id="@+id/identityFrame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
 ```
