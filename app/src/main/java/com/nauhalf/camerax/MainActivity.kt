@@ -43,10 +43,11 @@ open class MainActivity : AppCompatActivity() {
         return if (mediaDir != null && mediaDir.exists()) mediaDir.absolutePath else filesDir.absolutePath
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    override fun onResume() {
+        super.onResume()
+    }
 
+    fun startCamera() {
         if (allPermissionsGranted()) {
             try {
                 cameraUtil.startCamera()
@@ -70,6 +71,13 @@ open class MainActivity : AppCompatActivity() {
             }
 
         })
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        startCamera()
 
         camera_capture_button.setOnClickListener {
             cameraUtil.takePicture({

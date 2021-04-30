@@ -10,6 +10,7 @@ import android.os.HandlerThread
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Display
+import android.view.Surface
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -166,7 +167,7 @@ class CameraUtil(
             // The ratio for the output image and preview
             val aspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
             // The display rotation
-            val rotation = viewFinder?.display?.rotation as Int
+            val rotation = viewFinder?.display?.rotation ?: Surface.ROTATION_0
 
             val localCameraProvider = cameraProvider
                 ?: throw IllegalStateException("Camera initialization failed.")
