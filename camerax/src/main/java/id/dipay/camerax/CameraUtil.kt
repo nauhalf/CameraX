@@ -118,6 +118,11 @@ class CameraUtil(
         return this
     }
 
+    fun setCameraSelector(cameraSelector: CameraSelector): CameraUtil {
+        this.mLensFacing = cameraSelector
+        return this
+    }
+
     fun registerDisplayManager() {
         displayManager.registerDisplayListener(displayListener, null)
         mSensorRotationListener?.let {
