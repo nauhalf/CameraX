@@ -2,31 +2,35 @@ package com.nauhalf.camerax
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import id.dipay.camerax.CameraUtil
 import id.dipay.camerax.Selector
+import id.dipay.utils.CameraTimer
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import java.lang.IllegalStateException
 
 open class MainActivity : AppCompatActivity() {
 
     private val vm by viewModels<MainViewModel>()
 
     private val cameraUtil: CameraUtil by lazy {
-        CameraUtil(this, this, this.lifecycleScope, viewFinder, outputDirectory())
+        CameraUtil(this)
+            .setLifecycleOwner(this)
+            .setCoroutineScope(this.lifecycleScope)
+            .setPreviewView(viewFinder)
+            .setOutputDirectory(outputDirectory())
+            .setTimer(CameraTimer.S3)
+            .setImageQuality(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+            .setFlashMode(ImageCapture.FLASH_MODE_OFF)
     }
 
     private fun outputDirectory(): String {
@@ -37,11 +41,6 @@ open class MainActivity : AppCompatActivity() {
         }
 
         return if (mediaDir != null && mediaDir.exists()) mediaDir.absolutePath else filesDir.absolutePath
-    }
-
-    // The Folder location where all the files will be stored
-    private val outputDirectory: String by lazy {
-        "$cacheDir"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,17 +76,21 @@ open class MainActivity : AppCompatActivity() {
                 val msg = "Photo capture succeeded: $it"
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                 Log.d(CameraUtil.TAG, msg)
+            }, {
+                vm.setTimer(it)
             })
         }
 
         btnTorch.setOnClickListener {
-            cameraUtil.flash(if (cameraUtil.getFlashMode() == ImageCapture.FLASH_MODE_OFF) {
-                Toast.makeText(this, "FLASH_MODE_ON", Toast.LENGTH_SHORT).show()
-                ImageCapture.FLASH_MODE_ON
-            } else {
-                Toast.makeText(this, "FLASH_MODE_OFF", Toast.LENGTH_SHORT).show()
-                ImageCapture.FLASH_MODE_OFF
-            })
+            cameraUtil.flash(
+                if (cameraUtil.getFlashMode() == ImageCapture.FLASH_MODE_OFF) {
+                    Toast.makeText(this, "FLASH_MODE_ON", Toast.LENGTH_SHORT).show()
+                    ImageCapture.FLASH_MODE_ON
+                } else {
+                    Toast.makeText(this, "FLASH_MODE_OFF", Toast.LENGTH_SHORT).show()
+                    ImageCapture.FLASH_MODE_OFF
+                }
+            )
         }
 
         btnMirror.setOnClickListener {
@@ -124,6 +127,13 @@ open class MainActivity : AppCompatActivity() {
                 }
             }
 
+        }
+
+        vm.timer.observe(this) {
+            tvTimer.visibility = if (it > 0) View.VISIBLE else View.GONE
+            if (it > 0) {
+                tvTimer.text = "Timer : $it"
+            }
         }
     }
 

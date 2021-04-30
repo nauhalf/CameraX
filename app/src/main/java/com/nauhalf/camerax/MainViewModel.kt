@@ -7,6 +7,14 @@ import id.dipay.camerax.Selector
 
 class MainViewModel : ViewModel() {
     private val _cameraSelector = MutableLiveData(Selector.BACK)
+    private val _timer = MutableLiveData(0)
+    val timer: LiveData<Int>
+        get() = _timer
+
+    fun setTimer(value: Int){
+        _timer.value = value
+    }
+
     val cameraSelector: LiveData<Selector>
         get() = _cameraSelector
 
