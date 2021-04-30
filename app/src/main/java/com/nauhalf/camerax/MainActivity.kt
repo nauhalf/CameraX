@@ -2,15 +2,12 @@ package com.nauhalf.camerax
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -20,7 +17,6 @@ import id.dipay.camerax.Selector
 import id.dipay.utils.CameraTimer
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import java.lang.IllegalStateException
 
 open class MainActivity : AppCompatActivity() {
 
@@ -33,6 +29,8 @@ open class MainActivity : AppCompatActivity() {
             .setPreviewView(viewFinder)
             .setOutputDirectory(outputDirectory())
             .setTimer(CameraTimer.S3)
+            .setImageQuality(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+            .setFlashMode(ImageCapture.FLASH_MODE_OFF)
     }
 
     private fun outputDirectory(): String {
