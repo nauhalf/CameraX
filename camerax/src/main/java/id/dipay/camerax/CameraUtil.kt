@@ -112,7 +112,7 @@ class CameraUtil(
         return this
     }
 
-    fun setTimer(timer: CameraTimer): CameraUtil{
+    fun setTimer(timer: CameraTimer): CameraUtil {
         this.mSelectedTimer = timer
         return this
     }
@@ -289,13 +289,16 @@ class CameraUtil(
         localImageCapture.takePicture(
             outputOptions, // the options needed for the final image
             executor, // the executor, on which the task will run
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    outputFileResults.savedUri
-                        ?.let { uri ->
+            object : OnImageSavedCallback {
+                override fun onImageSaved(outputFileResults: OutputFileResults) {
+
+                    val uri = Uri.fromFile(file)
+                    uri?.let { uri ->
+                        activity.runOnUiThread {
                             result(uri)
                             Log.d(TAG, "Photo saved in $uri")
                         }
+                    }
                 }
 
                 override fun onError(exception: ImageCaptureException) {
