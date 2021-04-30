@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -31,6 +32,7 @@ open class MainActivity : AppCompatActivity() {
             .setTimer(CameraTimer.S3)
             .setImageQuality(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
             .setFlashMode(ImageCapture.FLASH_MODE_OFF)
+            .setCameraSelector(CameraSelector.DEFAULT_BACK_CAMERA)
     }
 
     private fun outputDirectory(): String {
