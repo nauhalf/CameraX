@@ -5,6 +5,8 @@
   Custom CameraX with Preview Frame Identity Card and Head with Identity Card
 
 Thanks to https://github.com/robertlevonyan/CameraXDemo for references
+
+For now only support with Kotlin
 ## How To Use
 
 ### Step 1. Add the JitPack repository to your build.gradle project
