@@ -33,6 +33,7 @@ open class MainActivity : AppCompatActivity() {
             .setImageQuality(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
             .setFlashMode(ImageCapture.FLASH_MODE_OFF)
             .setCameraSelector(CameraSelector.DEFAULT_BACK_CAMERA)
+            .setEnableTorch(true)
     }
 
     private fun outputDirectory(): String {
@@ -82,13 +83,18 @@ open class MainActivity : AppCompatActivity() {
         startCamera()
 
         camera_capture_button.setOnClickListener {
-            cameraUtil.takePicture({
+//            cameraUtil.takePicture({
+//                val msg = "Photo capture succeeded: $it"
+//                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+//                Log.d(CameraUtil.TAG, msg)
+//            }, {
+//                vm.setTimer(it)
+//            })
+            cameraUtil.takeSnapshot {
                 val msg = "Photo capture succeeded: $it"
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                 Log.d(CameraUtil.TAG, msg)
-            }, {
-                vm.setTimer(it)
-            })
+            }
         }
 
         btnTorch.setOnClickListener {
