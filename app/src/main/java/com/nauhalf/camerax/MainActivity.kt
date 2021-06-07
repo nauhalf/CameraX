@@ -33,6 +33,7 @@ open class MainActivity : AppCompatActivity() {
             .setImageQuality(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
             .setFlashMode(ImageCapture.FLASH_MODE_OFF)
             .setCameraSelector(CameraSelector.DEFAULT_BACK_CAMERA)
+            .setEnableTorch(true)
     }
 
     private fun outputDirectory(): String {

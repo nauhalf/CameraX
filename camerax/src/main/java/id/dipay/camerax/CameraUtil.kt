@@ -47,6 +47,7 @@ class CameraUtil(
     private var cameraProvider: ProcessCameraProvider? = null
     private var imageCapture: ImageCapture? = null
     private var imageAnalyzer: ImageAnalysis? = null
+    private var isTorchEnable: Boolean = false
 
     private var mFlashMode = FLASH_MODE_OFF
     private var mQuality = CAPTURE_MODE_MAXIMIZE_QUALITY
@@ -121,6 +122,16 @@ class CameraUtil(
 
     fun setCameraSelector(cameraSelector: CameraSelector): CameraUtil {
         this.mLensFacing = cameraSelector
+        return this
+    }
+
+    fun setImageAnalyzer(imageAnalyzer: ImageAnalysis): CameraUtil {
+        this.imageAnalyzer = imageAnalyzer
+        return this
+    }
+
+    fun setEnableTorch(isEnable: Boolean): CameraUtil {
+        this.isTorchEnable = isEnable
         return this
     }
 
@@ -206,31 +217,35 @@ class CameraUtil(
                 .build()
 
             // The Configuration of image analyzing
-            imageAnalyzer = ImageAnalysis.Builder()
-                .setTargetAspectRatio(aspectRatio) // set the analyzer aspect ratio
-                .setTargetRotation(rotation) // set the analyzer rotation
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // in our analysis, we care about the latest image
-                .build()
-                .apply {
-                    // Use a worker thread for image analysis to prevent glitches
-                    val analyzerThread = HandlerThread("LuminosityAnalysis").apply { start() }
-                    setAnalyzer(
-                        ThreadExecutor(Handler(analyzerThread.looper)),
-                        LuminosityAnalyzer()
-                    )
-                }
+            if (imageAnalyzer == null) {
+                imageAnalyzer = ImageAnalysis.Builder()
+                    .setTargetAspectRatio(aspectRatio) // set the analyzer aspect ratio
+                    .setTargetRotation(rotation) // set the analyzer rotation
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // in our analysis, we care about the latest image
+                    .build()
+                    .apply {
+                        // Use a worker thread for image analysis to prevent glitches
+                        val analyzerThread = HandlerThread("LuminosityAnalysis").apply { start() }
+                        setAnalyzer(
+                            ThreadExecutor(Handler(analyzerThread.looper)),
+                            LuminosityAnalyzer()
+                        )
+                    }
+            }
 
             localCameraProvider.unbindAll() // unbind the use-cases before rebinding them
 
             try {
                 // Bind all use cases to the camera with lifecycle
-                localCameraProvider.bindToLifecycle(
+                val cameraProvider = localCameraProvider.bindToLifecycle(
                     lifecycleOwner!!, // current lifecycle owner
                     mLensFacing, // either front or back facing
                     preview, // camera preview use case
                     imageCapture, // image capture use case
                     imageAnalyzer, // image analyzer use case
                 )
+
+                cameraProvider.cameraControl.enableTorch(isTorchEnable)
 
                 // Attach the viewfinder's surface provider to preview use case
                 preview?.setSurfaceProvider(viewFinder?.surfaceProvider)
