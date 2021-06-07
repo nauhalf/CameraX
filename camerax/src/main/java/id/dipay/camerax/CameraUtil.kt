@@ -3,6 +3,7 @@ package id.dipay.camerax
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.graphics.Bitmap
 import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Handler
@@ -17,14 +18,14 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.camera.view.SensorRotationListener
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import id.dipay.utils.CameraTimer
 import id.dipay.utils.ThreadExecutor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.max
@@ -257,6 +258,20 @@ class CameraUtil(
             timer?.invoke(0)
             captureImage(result)
         }
+
+    fun takeSnapshot(result: (Uri) -> Unit) = coroutineScope?.launch(Dispatchers.IO) {
+        if (!outputDirectory.isNullOrEmpty()) {
+            File(outputDirectory).mkdirs()
+            val file = File(outputDirectory, "${System.currentTimeMillis()}.jpg")
+            val stream: OutputStream = FileOutputStream(file)
+            withContext(Dispatchers.Main) {
+                viewFinder?.bitmap?.compress(Bitmap.CompressFormat.JPEG,80, stream)
+                stream.flush()
+                stream.close()
+                result.invoke(file.toUri())
+            }
+        }
+    }
 
     fun flash(@FlashMode flash: Int) {
         setFlashMode(flash)
