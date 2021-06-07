@@ -2,7 +2,9 @@ package com.nauhalf.camerax
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -12,6 +14,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.lifecycleScope
 import id.dipay.camerax.CameraUtil
 import id.dipay.camerax.Selector
@@ -25,15 +28,15 @@ open class MainActivity : AppCompatActivity() {
 
     private val cameraUtil: CameraUtil by lazy {
         CameraUtil(this)
+            .registerLifecycle(lifecycle)
             .setLifecycleOwner(this)
             .setCoroutineScope(this.lifecycleScope)
             .setPreviewView(viewFinder)
-            .setOutputDirectory(outputDirectory())
             .setTimer(CameraTimer.S3)
             .setImageQuality(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
             .setFlashMode(ImageCapture.FLASH_MODE_OFF)
             .setCameraSelector(CameraSelector.DEFAULT_BACK_CAMERA)
-            .setEnableTorch(true)
+            .setEnableTorch(false)
     }
 
     private fun outputDirectory(): String {
@@ -46,11 +49,7 @@ open class MainActivity : AppCompatActivity() {
         return if (mediaDir != null && mediaDir.exists()) mediaDir.absolutePath else filesDir.absolutePath
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
-    fun startCamera() {
+    private fun startCamera() {
         if (allPermissionsGranted()) {
             try {
                 cameraUtil.startCamera()
@@ -62,18 +61,6 @@ open class MainActivity : AppCompatActivity() {
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
-
-        cameraUtil.registerDisplayManager()
-        viewFinder.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(v: View?) {
-                cameraUtil.registerDisplayManager()
-            }
-
-            override fun onViewDetachedFromWindow(v: View?) {
-                cameraUtil.unregisterDisplayManager()
-            }
-
-        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,14 +70,20 @@ open class MainActivity : AppCompatActivity() {
         startCamera()
 
         camera_capture_button.setOnClickListener {
-//            cameraUtil.takePicture({
+//            cameraUtil.takePicture(outputDirectory = outputDirectory(), {
 //                val msg = "Photo capture succeeded: $it"
 //                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
 //                Log.d(CameraUtil.TAG, msg)
 //            }, {
 //                vm.setTimer(it)
 //            })
-            cameraUtil.takeSnapshot {
+          /*  cameraUtil.takeSnapshot(outputDirectory = outputDirectory(), fileName = System.currentTimeMillis().toString()) {
+                val msg = "Photo capture succeeded: $it"
+                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                Log.d(CameraUtil.TAG, msg)
+            }*/
+            cameraUtil.takeSnapshotGallery(path = "/Pictures/" + resources.getString(R.string.app_name),
+                fileName = System.currentTimeMillis().toString()) {
                 val msg = "Photo capture succeeded: $it"
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                 Log.d(CameraUtil.TAG, msg)
@@ -98,15 +91,16 @@ open class MainActivity : AppCompatActivity() {
         }
 
         btnTorch.setOnClickListener {
-            cameraUtil.flash(
-                if (cameraUtil.getFlashMode() == ImageCapture.FLASH_MODE_OFF) {
-                    Toast.makeText(this, "FLASH_MODE_ON", Toast.LENGTH_SHORT).show()
-                    ImageCapture.FLASH_MODE_ON
-                } else {
-                    Toast.makeText(this, "FLASH_MODE_OFF", Toast.LENGTH_SHORT).show()
-                    ImageCapture.FLASH_MODE_OFF
-                }
-            )
+//            cameraUtil.flash(
+//                if (cameraUtil.getFlashMode() == ImageCapture.FLASH_MODE_OFF) {
+//                    Toast.makeText(this, "FLASH_MODE_ON", Toast.LENGTH_SHORT).show()
+//                    ImageCapture.FLASH_MODE_ON
+//                } else {
+//                    Toast.makeText(this, "FLASH_MODE_OFF", Toast.LENGTH_SHORT).show()
+//                    ImageCapture.FLASH_MODE_OFF
+//                }
+//            )
+            cameraUtil.setEnableTorch(!cameraUtil.isTorchEnable())
         }
 
         btnMirror.setOnClickListener {
@@ -116,12 +110,6 @@ open class MainActivity : AppCompatActivity() {
         }
 
         observeLiveData()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        cameraUtil.unbind()
-        cameraUtil.unregisterDisplayManager()
     }
 
     private fun observeLiveData() {
@@ -178,7 +166,7 @@ open class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
 }
