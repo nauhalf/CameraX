@@ -27,7 +27,7 @@ allprojects {
 ```
 dependencies {
     ...
-    implementation "androidx.camera:camera-view:1.0.0-alpha24"
+    implementation "androidx.camera:camera-view:<LATEST_VERSION>"
     implementation 'com.github.nauhalf:Camerax:<LATEST_VERSION>'
 }
 ```
