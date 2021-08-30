@@ -21,7 +21,7 @@ import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.camera.view.SensorRotationListener
+import id.dipay.utils.SensorRotationListener
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
@@ -34,7 +34,6 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
-import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
