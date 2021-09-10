@@ -34,6 +34,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -281,8 +282,8 @@ class CameraUtil(
         })
     }
 
-  /*  @Suppress("NON_EXHAUSTIVE_WHEN")
-    fun takePicture(outputDirectory: String, result: (Uri) -> Unit, timer: ((Int) -> Unit)? = null) =
+    @Suppress("NON_EXHAUSTIVE_WHEN")
+    fun takePicture(outputDirectory: String, fileName: String, result: (Uri) -> Unit, timer: ((Int) -> Unit)? = null) =
         coroutineScope?.launch(Dispatchers.Main) {
             // Show a timer based on user selection
             when (mSelectedTimer) {
@@ -296,8 +297,8 @@ class CameraUtil(
                 }
             }
             timer?.invoke(0)
-            captureImage(outputDirectory, result)
-        }*/
+            captureImage(outputDirectory, fileName, result)
+        }
 
     /**
      * @param fileName -> String file name to save
@@ -392,8 +393,8 @@ class CameraUtil(
         startCamera()
     }
 
-/*
-    private fun captureImage(outputDirectory: String, result: (Uri) -> Unit) {
+
+    private fun captureImage(outputDirectory: String, fileName: String, result: (Uri) -> Unit) {
         val localImageCapture =
             imageCapture ?: throw IllegalStateException("Camera initialization failed.")
 
@@ -403,10 +404,8 @@ class CameraUtil(
             isReversedHorizontal = mLensFacing == CameraSelector.DEFAULT_FRONT_CAMERA
         }
 
-        // Options fot the output image file
         File(outputDirectory).mkdirs()
-        val file = File(outputDirectory, "${System.currentTimeMillis()}.jpg")
-
+        val file = File(outputDirectory, "$fileName.jpg")
 
         val outputOptions = OutputFileOptions.Builder(file).setMetadata(metadata).build()
 
@@ -418,10 +417,10 @@ class CameraUtil(
                 override fun onImageSaved(outputFileResults: OutputFileResults) {
 
                     val uri = Uri.fromFile(file)
-                    uri?.let { uri ->
+                    uri?.let { u ->
                         activity.runOnUiThread {
-                            result(uri)
-                            Log.d(TAG, "Photo saved in $uri")
+                            result(u)
+                            Log.d(TAG, "Photo saved in $u")
                         }
                     }
                 }
@@ -433,7 +432,7 @@ class CameraUtil(
             }
         )
     }
-*/
+
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun resume() {

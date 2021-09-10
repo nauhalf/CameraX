@@ -70,24 +70,24 @@ open class MainActivity : AppCompatActivity() {
         startCamera()
 
         camera_capture_button.setOnClickListener {
-//            cameraUtil.takePicture(outputDirectory = outputDirectory(), {
-//                val msg = "Photo capture succeeded: $it"
-//                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-//                Log.d(CameraUtil.TAG, msg)
-//            }, {
-//                vm.setTimer(it)
-//            })
+            cameraUtil.takePicture(outputDirectory = outputDirectory(), System.currentTimeMillis().toString() , {
+                val msg = "Photo capture succeeded: $it"
+                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                Log.d(CameraUtil.TAG, msg)
+            }, {
+                vm.setTimer(it)
+            })
           /*  cameraUtil.takeSnapshot(outputDirectory = outputDirectory(), fileName = System.currentTimeMillis().toString()) {
                 val msg = "Photo capture succeeded: $it"
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                 Log.d(CameraUtil.TAG, msg)
             }*/
-            cameraUtil.takeSnapshotGallery(path = "/Pictures/" + resources.getString(R.string.app_name),
-                fileName = System.currentTimeMillis().toString()) {
-                val msg = "Photo capture succeeded: $it"
-                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                Log.d(CameraUtil.TAG, msg)
-            }
+//            cameraUtil.takeSnapshotGallery(path = "/Pictures/" + resources.getString(R.string.app_name),
+//                fileName = System.currentTimeMillis().toString()) {
+//                val msg = "Photo capture succeeded: $it"
+//                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+//                Log.d(CameraUtil.TAG, msg)
+//            }
         }
 
         btnTorch.setOnClickListener {
