@@ -32,7 +32,7 @@ open class MainActivity : AppCompatActivity() {
             .setLifecycleOwner(this)
             .setCoroutineScope(this.lifecycleScope)
             .setPreviewView(viewFinder)
-            .setTimer(CameraTimer.S3)
+            .setTimer(CameraTimer.OFF)
             .setImageQuality(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
             .setFlashMode(ImageCapture.FLASH_MODE_OFF)
             .setCameraSelector(CameraSelector.DEFAULT_BACK_CAMERA)

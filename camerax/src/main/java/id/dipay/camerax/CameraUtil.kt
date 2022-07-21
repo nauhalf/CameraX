@@ -295,6 +295,9 @@ class CameraUtil(
                     timer?.invoke(i)
                     delay(1000)
                 }
+                else -> {
+                    timer?.invoke(0)
+                }
             }
             timer?.invoke(0)
             captureImage(outputDirectory, fileName, result)
